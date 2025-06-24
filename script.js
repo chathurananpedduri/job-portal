@@ -38,12 +38,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function fetchAndRenderJobs() {
         try {
+            console.log('Fetching jobs with token:', authToken); // Debug log
             const res = await fetch(`${API_BASE_URL}/api/jobs`, {
-                headers: { 'Authorization': `Bearer ${authToken}` }
+                headers: { 
+                    'Authorization': `Bearer ${authToken}`,
+                    'Content-Type': 'application/json'
+                }
             });
+            if (!res.ok) {
+                throw new Error(`Failed to fetch jobs: ${res.status}`);
+            }
             jobs = await res.json();
+            console.log('Fetched jobs:', jobs); // Debug log
             renderJobs();
         } catch (err) {
+            console.error('Error fetching jobs:', err); // Debug log
             jobsContainer.innerHTML = '<div style="text-align:center;color:#d8000c;">Failed to load jobs.</div>';
         }
     }
@@ -159,31 +168,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const job = { role, description, link };
         try {
-            if (editIndex !== null) {
-                // Update job
-                await fetch(`${API_BASE_URL}/api/jobs/${jobs[editIndex].id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify(job)
-                });
-            } else {
-                // Create job
-                await fetch(`${API_BASE_URL}/api/jobs`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify(job)
-                });
+            const endpoint = editIndex !== null ? 
+                `${API_BASE_URL}/api/jobs/${jobs[editIndex].id}` : 
+                `${API_BASE_URL}/api/jobs`;
+            
+            const method = editIndex !== null ? 'PUT' : 'POST';
+            
+            console.log('Sending job data:', { endpoint, method, job }); // Debug log
+            
+            const res = await fetch(endpoint, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(job)
+            });
+            
+            if (!res.ok) {
+                throw new Error(`Failed to ${editIndex !== null ? 'update' : 'create'} job: ${res.status}`);
             }
+            
             clearForm();
             fetchAndRenderJobs();
         } catch (err) {
-            formError.textContent = 'Failed to save job.';
+            console.error('Error saving job:', err); // Debug log
+            formError.textContent = `Failed to save job: ${err.message}`;
         }
     });
 
@@ -209,6 +219,8 @@ document.addEventListener('DOMContentLoaded', function () {
     function updatePrivileges() {
         isAdmin = (userRole && userRole.toLowerCase() === 'admin');
         isLoggedIn = !!authToken;
+        
+        console.log('Auth Status:', { isAdmin, isLoggedIn, userRole, authToken }); // Debug log
         
         // Update UI based on login status
         if (isLoggedIn) {
