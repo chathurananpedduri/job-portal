@@ -75,8 +75,8 @@ document.addEventListener('DOMContentLoaded', function () {
             desc.textContent = job.description;
             card.appendChild(desc);
 
-            // Add application link section
-            if (job.link && job.link.trim()) {
+            // Add application link section if it exists
+            if (job.applicationLink && job.applicationLink.trim()) {
                 const linkContainer = document.createElement('div');
                 linkContainer.className = 'link-container';
                 
@@ -86,10 +86,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 linkContainer.appendChild(linkLabel);
                 
                 const linkText = document.createElement('a');
-                linkText.href = job.link.startsWith('http') ? job.link : 'http://' + job.link;
+                linkText.href = job.applicationLink.startsWith('http') ? job.applicationLink : 'http://' + job.applicationLink;
                 linkText.target = '_blank';
                 linkText.rel = 'noopener noreferrer';
-                linkText.textContent = job.link;
+                linkText.textContent = job.applicationLink;
                 linkText.className = 'link-text';
                 linkContainer.appendChild(linkText);
                 
@@ -99,10 +99,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const btnRow = document.createElement('div');
             btnRow.className = 'card-btn-row';
 
-            if (job.link && job.link.trim()) {
+            if (job.applicationLink && job.applicationLink.trim()) {
                 const applyBtn = document.createElement('a');
                 applyBtn.className = 'apply-btn';
-                applyBtn.href = job.link.startsWith('http') ? job.link : 'http://' + job.link;
+                applyBtn.href = job.applicationLink.startsWith('http') ? job.applicationLink : 'http://' + job.applicationLink;
                 applyBtn.target = '_blank';
                 applyBtn.rel = 'noopener noreferrer';
                 applyBtn.textContent = 'Apply';
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 modifyBtn.onclick = function () {
                     jobForm.jobRole.value = job.role;
                     jobForm.jobDescription.value = job.description;
-                    jobForm.applicationLink.value = job.link || '';
+                    jobForm.applicationLink.value = job.applicationLink || '';
                     editIndex = idx;
                     jobForm.querySelector('button[type="submit"]').textContent = 'Update';
                     if (formSection.style.display === 'none') {
@@ -130,11 +130,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 deleteBtn.className = 'delete-btn';
                 deleteBtn.textContent = 'Delete';
                 deleteBtn.onclick = async function () {
-                    await fetch(`${API_BASE_URL}/api/jobs/${job.id}`, {
-                        method: 'DELETE',
-                        headers: { 'Authorization': `Bearer ${authToken}` }
-                    });
-                    fetchAndRenderJobs();
+                    if (confirm('Are you sure you want to delete this job?')) {
+                        try {
+                            const res = await fetch(`${API_BASE_URL}/api/jobs/${job.id}`, {
+                                method: 'DELETE',
+                                headers: { 'Authorization': `Bearer ${authToken}` }
+                            });
+                            if (!res.ok) {
+                                throw new Error('Failed to delete job');
+                            }
+                            fetchAndRenderJobs();
+                        } catch (err) {
+                            console.error('Error deleting job:', err);
+                            alert('Failed to delete job. Please try again.');
+                        }
+                    }
                 };
                 btnRow.appendChild(deleteBtn);
             }
@@ -155,18 +165,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const role = jobForm.jobRole.value.trim();
         const description = jobForm.jobDescription.value.trim();
-        const link = jobForm.applicationLink.value.trim();
+        const applicationLink = jobForm.applicationLink.value.trim();
 
         if (!role || !description) {
             formError.textContent = 'Please fill in all required fields.';
             return;
         }
-        if (link && !isValidURL(link)) {
+        if (applicationLink && !isValidURL(applicationLink)) {
             formError.textContent = 'Please enter a valid application link (URL).';
             return;
         }
 
-        const job = { role, description, link };
+        const job = { 
+            role, 
+            description, 
+            applicationLink: applicationLink || '' // Ensure applicationLink is included
+        };
+        
         try {
             const endpoint = editIndex !== null ? 
                 `${API_BASE_URL}/api/jobs/${jobs[editIndex].id}` : 

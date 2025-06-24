@@ -48,8 +48,10 @@
                         <textarea id="jobDescription" name="jobDescription" rows="4" required></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="applicationLink">External Application Link (Optional)</label>
-                        <input type="url" id="applicationLink" name="applicationLink">
+                        <label for="applicationLink">Application Link</label>
+                        <input type="url" id="applicationLink" name="applicationLink" 
+                               placeholder="https://example.com/apply">
+                        <small class="form-hint">Enter the full URL where candidates can apply for this position</small>
                     </div>
                     <button type="submit" class="submit-btn">Post Job Profile</button>
                     <div id="formError" class="error"></div>
