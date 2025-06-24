@@ -165,6 +165,7 @@
         });
         if (!res.ok) throw new Error('Invalid credentials');
         const data = await res.json();
+        console.log(data);
         // Assume backend returns { token, role, username }
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('userRole', data.role);
