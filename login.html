@@ -39,7 +39,7 @@
         color: #333;
         font-size: 1.08rem;
       }
-      .login-page-container input[type="email"],
+      .login-page-container input[type="text"],
       .login-page-container input[type="password"] {
         width: 100%;
         padding: 13px 14px;
@@ -98,8 +98,8 @@
     <h2 id="formTitle">KiranCareers Login</h2>
     <form id="loginForm">
       <div class="form-group">
-        <label for="loginEmail">Email</label>
-        <input type="email" id="loginEmail" required autocomplete="username">
+        <label for="loginUsername">Username</label>
+        <input type="text" id="loginUsername" required autocomplete="username">
       </div>
       <div class="form-group">
         <label for="loginPassword">Password</label>
@@ -110,8 +110,8 @@
     </form>
     <form id="registerForm" style="display:none;">
       <div class="form-group">
-        <label for="registerEmail">Email</label>
-        <input type="email" id="registerEmail" required autocomplete="username">
+        <label for="registerUsername">Username</label>
+        <input type="text" id="registerUsername" required autocomplete="username">
       </div>
       <div class="form-group">
         <label for="registerPassword">Password</label>
@@ -155,20 +155,20 @@
     loginForm.addEventListener('submit', async function (e) {
       e.preventDefault();
       loginError.textContent = '';
-      const email = document.getElementById('loginEmail').value.trim();
+      const username = document.getElementById('loginUsername').value.trim();
       const password = document.getElementById('loginPassword').value;
       try {
-        const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        const res = await fetch(`${API_BASE_URL}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ username, password })
         });
         if (!res.ok) throw new Error('Invalid credentials');
         const data = await res.json();
-        // Assume backend returns { token, role, email }
+        // Assume backend returns { token, role, username }
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('userRole', data.role);
-        localStorage.setItem('userEmail', data.email);
+        localStorage.setItem('userName', data.username);
         window.location.href = 'index.html';
       } catch (err) {
         loginError.textContent = 'Login failed: ' + err.message;
@@ -178,7 +178,7 @@
     registerForm.addEventListener('submit', async function (e) {
       e.preventDefault();
       registerError.textContent = '';
-      const email = document.getElementById('registerEmail').value.trim();
+      const username = document.getElementById('registerUsername').value.trim();
       const password = document.getElementById('registerPassword').value;
       const confirmPassword = document.getElementById('registerConfirmPassword').value;
       if (password !== confirmPassword) {
@@ -186,23 +186,23 @@
         return;
       }
       try {
-        const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        const res = await fetch(`${API_BASE_URL}/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ username, password })
         });
         if (!res.ok) throw new Error('Registration failed');
         // On success, log in automatically
-        const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        const loginRes = await fetch(`${API_BASE_URL}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ username, password })
         });
         if (!loginRes.ok) throw new Error('Registration succeeded but login failed');
         const data = await loginRes.json();
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('userRole', data.role);
-        localStorage.setItem('userEmail', data.email);
+        localStorage.setItem('userName', data.username);
         window.location.href = 'index.html';
       } catch (err) {
         registerError.textContent = 'Registration failed: ' + err.message;
