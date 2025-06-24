@@ -121,6 +121,14 @@
         <label for="registerConfirmPassword">Confirm Password</label>
         <input type="password" id="registerConfirmPassword" required autocomplete="new-password">
       </div>
+      <div class="form-group">
+        <label for="registerRole">Role</label>
+        <select id="registerRole" required class="role-select">
+          <option value="">Select Role</option>
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
       <div id="registerError" class="error"></div>
       <button type="submit" class="submit-btn">Register</button>
     </form>
@@ -192,30 +200,58 @@
       const username = document.getElementById('registerUsername').value.trim();
       const password = document.getElementById('registerPassword').value;
       const confirmPassword = document.getElementById('registerConfirmPassword').value;
+      const role = document.getElementById('registerRole').value;
+
+      if (!username || !password || !role) {
+        registerError.textContent = 'Please fill in all fields.';
+        return;
+      }
+
       if (password !== confirmPassword) {
         registerError.textContent = 'Passwords do not match.';
         return;
       }
+
       try {
         const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
+          body: JSON.stringify({ username, password, role })
         });
-        if (!res.ok) throw new Error('Registration failed');
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.message || 'Registration failed');
+        }
+
         // On success, log in automatically
         const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
         });
-        if (!loginRes.ok) throw new Error('Registration succeeded but login failed');
+
+        if (!loginRes.ok) {
+          throw new Error('Registration succeeded but login failed');
+        }
+
         const data = await loginRes.json();
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('userRole', data.role);
-        localStorage.setItem('userName', data.username);
+        
+        // Store auth data
+        if (typeof data === 'object' && data.token) {
+            localStorage.setItem('authToken', data.token);
+            localStorage.setItem('userRole', data.role || role);
+            localStorage.setItem('userName', data.username || username);
+        } else {
+            // If data is just the token string
+            localStorage.setItem('authToken', data);
+            localStorage.setItem('userRole', role);
+            localStorage.setItem('userName', username);
+        }
+
         window.location.href = 'index.html';
       } catch (err) {
+        console.error('Registration error:', err);
         registerError.textContent = 'Registration failed: ' + err.message;
       }
     });
