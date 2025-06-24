@@ -166,10 +166,9 @@
         if (!res.ok) throw new Error('Invalid credentials');
         const data = await res.json();
         console.log(data);
-        // Assume backend returns { token, role, username }
-        localStorage.setItem('authToken', data);
-        // localStorage.setItem('userRole', data.role);
-        // localStorage.setItem('userName', data.username);
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userRole', data.role);
+        localStorage.setItem('userName', data.username);
         window.location.href = 'index.html';
       } catch (err) {
         loginError.textContent = 'Login failed: ' + err.message;
