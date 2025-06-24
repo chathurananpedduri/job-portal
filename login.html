@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | KiranCareers</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #f3f7fa 0%, #e3eefe 100%);
+      }
+      .login-page-container {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+        padding: 40px 32px 32px 32px;
+        min-width: 320px;
+        max-width: 95vw;
+        width: 350px;
+        text-align: center;
+      }
+      .login-page-container h2 {
+        margin-top: 0;
+        margin-bottom: 18px;
+        color: #3498fd;
+        font-size: 1.7rem;
+        font-weight: 700;
+      }
+      .login-page-container .form-group {
+        margin-bottom: 22px;
+        text-align: left;
+      }
+      .login-page-container label {
+        font-weight: 600;
+        color: #333;
+        font-size: 1.08rem;
+      }
+      .login-page-container input[type="email"],
+      .login-page-container input[type="password"] {
+        width: 100%;
+        padding: 13px 14px;
+        border: 1.5px solid #e3eefe;
+        border-radius: 8px;
+        font-size: 1.08rem;
+        background: #f8fafc;
+        margin-top: 6px;
+        outline: none;
+        transition: border 0.2s;
+        margin-bottom: 2px;
+        box-sizing: border-box;
+      }
+      .login-page-container input:focus {
+        border-color: #3498fd;
+        background: #fff;
+      }
+      .login-page-container .submit-btn {
+        background: linear-gradient(90deg, #6a82fb 0%, #3498fd 100%);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        padding: 14px 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(52,152,253,0.07);
+        transition: background 0.2s, box-shadow 0.2s;
+        width: 100%;
+        margin-top: 10px;
+        letter-spacing: 0.5px;
+      }
+      .login-page-container .submit-btn:hover {
+        background: linear-gradient(90deg, #3498fd 0%, #6a82fb 100%);
+        box-shadow: 0 4px 16px rgba(52,152,253,0.13);
+      }
+      .login-page-container .error {
+        color: #d8000c;
+        min-height: 22px;
+        font-size: 1rem;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+      .toggle-link {
+        color: #3498fd;
+        cursor: pointer;
+        text-decoration: underline;
+        font-size: 1rem;
+        margin-top: 10px;
+        display: inline-block;
+      }
+    </style>
+</head>
+<body>
+  <div class="login-page-container">
+    <h2 id="formTitle">KiranCareers Login</h2>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" required autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" required autocomplete="current-password">
+      </div>
+      <div id="loginError" class="error"></div>
+      <button type="submit" class="submit-btn">Login</button>
+    </form>
+    <form id="registerForm" style="display:none;">
+      <div class="form-group">
+        <label for="registerEmail">Email</label>
+        <input type="email" id="registerEmail" required autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="registerPassword">Password</label>
+        <input type="password" id="registerPassword" required autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label for="registerConfirmPassword">Confirm Password</label>
+        <input type="password" id="registerConfirmPassword" required autocomplete="new-password">
+      </div>
+      <div id="registerError" class="error"></div>
+      <button type="submit" class="submit-btn">Register</button>
+    </form>
+    <span class="toggle-link" id="toggleRegister">New user? Register here</span>
+    <span class="toggle-link" id="toggleLogin" style="display:none;">Already have an account? Login</span>
+  </div>
+  <script>
+    const API_BASE_URL = "https://jobportalbackend-whs2.onrender.com";
+    const loginForm = document.getElementById('loginForm');
+    const loginError = document.getElementById('loginError');
+    const registerForm = document.getElementById('registerForm');
+    const registerError = document.getElementById('registerError');
+    const toggleRegister = document.getElementById('toggleRegister');
+    const toggleLogin = document.getElementById('toggleLogin');
+    const formTitle = document.getElementById('formTitle');
+
+    toggleRegister.onclick = function() {
+      loginForm.style.display = 'none';
+      registerForm.style.display = '';
+      toggleRegister.style.display = 'none';
+      toggleLogin.style.display = '';
+      formTitle.textContent = 'Register';
+    };
+    toggleLogin.onclick = function() {
+      loginForm.style.display = '';
+      registerForm.style.display = 'none';
+      toggleRegister.style.display = '';
+      toggleLogin.style.display = 'none';
+      formTitle.textContent = 'KiranCareers Login';
+    };
+
+    loginForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      loginError.textContent = '';
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        if (!res.ok) throw new Error('Invalid credentials');
+        const data = await res.json();
+        // Assume backend returns { token, role, email }
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userRole', data.role);
+        localStorage.setItem('userEmail', data.email);
+        window.location.href = 'index.html';
+      } catch (err) {
+        loginError.textContent = 'Login failed: ' + err.message;
+      }
+    });
+
+    registerForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      registerError.textContent = '';
+      const email = document.getElementById('registerEmail').value.trim();
+      const password = document.getElementById('registerPassword').value;
+      const confirmPassword = document.getElementById('registerConfirmPassword').value;
+      if (password !== confirmPassword) {
+        registerError.textContent = 'Passwords do not match.';
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        if (!res.ok) throw new Error('Registration failed');
+        // On success, log in automatically
+        const loginRes = await fetch(`${API_BASE_URL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        if (!loginRes.ok) throw new Error('Registration succeeded but login failed');
+        const data = await loginRes.json();
+        localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userRole', data.role);
+        localStorage.setItem('userEmail', data.email);
+        window.location.href = 'index.html';
+      } catch (err) {
+        registerError.textContent = 'Registration failed: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html> 

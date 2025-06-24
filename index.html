@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KiranCareers</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="main-header-gradient">
+        <header class="site-header reference-header">
+            <div class="header-bar">
+                <h1 class="main-title">Job Portal</h1>
+                <div class="auth-controls">
+                    <span id="roleLabel">User</span>
+                    <button id="loginBtn" class="auth-btn" ><a href="login.html" target="_self">Login as Admin</a></button>
+                    <button id="logoutBtn" class="auth-btn" style="display:none;">Logout</button>
+                </div>
+            </div>
+            <p class="subtitle">Post opportunities and find your next career move</p>
+        </header>
+        <nav class="tab-nav">
+            <button class="tab active" id="postTab">Post a Job</button>
+            <button class="tab inactive" id="browseTab">Browse Jobs</button>
+        </nav>
+    </div>
+    <div id="adminModal" class="modal-overlay" style="display:none;">
+        <div class="modal admin-modal">
+            <h3>Admin Login</h3>
+            <input type="password" id="adminPassword" placeholder="Enter admin password" class="admin-password-input">
+            <div id="adminError" class="error"></div>
+            <div class="admin-modal-btns">
+                <button id="adminLoginSubmit" class="auth-btn">Login</button>
+                <button id="adminLoginCancel" class="auth-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+    <main>
+        <section class="form-section">
+            <div class="form-card">
+                <form id="jobForm" novalidate>
+                    <div class="form-group">
+                        <label for="jobRole">Job Role <span class="required">*</span></label>
+                        <input type="text" id="jobRole" name="jobRole" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="jobDescription">Job Description <span class="required">*</span></label>
+                        <textarea id="jobDescription" name="jobDescription" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="applicationLink">External Application Link (Optional)</label>
+                        <input type="url" id="applicationLink" name="applicationLink">
+                    </div>
+                    <button type="submit" class="submit-btn">Post Job Profile</button>
+                    <div id="formError" class="error"></div>
+                </form>
+            </div>
+        </section>
+        <section class="jobs-section">
+            <h2>Open Positions</h2>
+            <div id="jobsContainer"></div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div>© 2024 KiranCareers. All rights reserved.</div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html> 
