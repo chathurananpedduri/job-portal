@@ -428,4 +428,29 @@ textarea:focus {
         width: 98vw;
         padding: 18px 4vw 18px 4vw;
     }
+}
+
+.link-container {
+    margin: 4px 0 12px 0;
+    padding: 8px 12px;
+    background: #f0f7ff;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+.link-label {
+    color: #555;
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.link-text {
+    color: #007bff;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.link-text:hover {
+    text-decoration: underline;
+    color: #0056b3;
 } 

@@ -66,10 +66,31 @@ document.addEventListener('DOMContentLoaded', function () {
             desc.textContent = job.description;
             card.appendChild(desc);
 
+            // Add application link section
+            if (job.link && job.link.trim()) {
+                const linkContainer = document.createElement('div');
+                linkContainer.className = 'link-container';
+                
+                const linkLabel = document.createElement('span');
+                linkLabel.className = 'link-label';
+                linkLabel.textContent = 'Application Link: ';
+                linkContainer.appendChild(linkLabel);
+                
+                const linkText = document.createElement('a');
+                linkText.href = job.link.startsWith('http') ? job.link : 'http://' + job.link;
+                linkText.target = '_blank';
+                linkText.rel = 'noopener noreferrer';
+                linkText.textContent = job.link;
+                linkText.className = 'link-text';
+                linkContainer.appendChild(linkText);
+                
+                card.appendChild(linkContainer);
+            }
+
             const btnRow = document.createElement('div');
             btnRow.className = 'card-btn-row';
 
-            if (job.link) {
+            if (job.link && job.link.trim()) {
                 const applyBtn = document.createElement('a');
                 applyBtn.className = 'apply-btn';
                 applyBtn.href = job.link.startsWith('http') ? job.link : 'http://' + job.link;
@@ -86,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 modifyBtn.onclick = function () {
                     jobForm.jobRole.value = job.role;
                     jobForm.jobDescription.value = job.description;
-                    jobForm.applicationLink.value = job.link;
+                    jobForm.applicationLink.value = job.link || '';
                     editIndex = idx;
                     jobForm.querySelector('button[type="submit"]').textContent = 'Update';
                     if (formSection.style.display === 'none') {
@@ -188,32 +209,42 @@ document.addEventListener('DOMContentLoaded', function () {
     function updatePrivileges() {
         isAdmin = (userRole && userRole.toLowerCase() === 'admin');
         isLoggedIn = !!authToken;
+        
+        // Update UI based on login status
+        if (isLoggedIn) {
+            loginBtn.style.display = 'none';
+            logoutBtn.style.display = '';
+            roleLabel.textContent = isAdmin ? 'Admin' : 'User';
+        } else {
+            loginBtn.style.display = '';
+            logoutBtn.style.display = 'none';
+            roleLabel.textContent = 'Guest';
+        }
+
+        // Update admin-specific UI elements
         if (isAdmin) {
             postTab.style.display = '';
             formSection.style.display = '';
-            loginBtn.style.display = 'none';
-            logoutBtn.style.display = '';
-            roleLabel.textContent = 'Admin';
             showPostTab();
         } else {
             postTab.style.display = 'none';
             formSection.style.display = 'none';
-            loginBtn.style.display = '';
-            logoutBtn.style.display = 'none';
-            roleLabel.textContent = 'User';
             showBrowseTab();
         }
+        
         fetchAndRenderJobs();
     }
 
     logoutBtn.addEventListener('click', function () {
+        // Clear all auth-related data
         isAdmin = false;
         isLoggedIn = false;
         authToken = null;
         userRole = null;
         userEmail = null;
         localStorage.clear();
-        roleLabel.textContent = 'User';
+        
+        // Redirect to login page
         window.location.href = 'login.html';
     });
 
