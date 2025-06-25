@@ -10,14 +10,35 @@ document.addEventListener('DOMContentLoaded', function () {
     const logoutBtn = document.getElementById('logoutBtn');
     const roleLabel = document.getElementById('roleLabel');
 
+    // --- JWT decode helper ---
+    function decodeJWT(token) {
+        if (!token) return {};
+        try {
+            const payload = token.split('.')[1];
+            const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+            return JSON.parse(decodeURIComponent(escape(decoded)));
+        } catch (e) {
+            return {};
+        }
+    }
+
     const API_BASE_URL = "https://jobportalbackend-whs2.onrender.com";
     let jobs = [];
     let editIndex = null;
     let isAdmin = false;
     let isLoggedIn = false;
     let authToken = localStorage.getItem('authToken');
-    let userRole = localStorage.getItem('userRole');
+    let userRole = null;
     let userEmail = localStorage.getItem('userEmail');
+
+    // Always decode the role from the token if present
+    if (authToken) {
+        const decoded = decodeJWT(authToken);
+        userRole = decoded.role || localStorage.getItem('userRole');
+        localStorage.setItem('userRole', userRole); // keep in sync
+    } else {
+        userRole = localStorage.getItem('userRole');
+    }
 
     function isValidURL(url) {
         if (!url) return true;
@@ -232,6 +253,12 @@ document.addEventListener('DOMContentLoaded', function () {
     browseTab.addEventListener('click', showBrowseTab);
 
     function updatePrivileges() {
+        // Always decode the role from the token
+        if (authToken) {
+            const decoded = decodeJWT(authToken);
+            userRole = decoded.role || localStorage.getItem('userRole');
+            localStorage.setItem('userRole', userRole); // keep in sync
+        }
         isAdmin = (userRole && userRole.toLowerCase() === 'admin');
         isLoggedIn = !!authToken;
         

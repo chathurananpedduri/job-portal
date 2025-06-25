@@ -160,6 +160,18 @@
       formTitle.textContent = 'KiranCareers Login';
     };
 
+    // --- JWT decode helper ---
+    function decodeJWT(token) {
+      if (!token) return {};
+      try {
+        const payload = token.split('.')[1];
+        const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+        return JSON.parse(decodeURIComponent(escape(decoded)));
+      } catch (e) {
+        return {};
+      }
+    }
+
     loginForm.addEventListener('submit', async function (e) {
       e.preventDefault();
       loginError.textContent = '';
@@ -175,17 +187,13 @@
         const data = await res.json();
         console.log('Login response:', data); // Debug log
         
-        // Store auth data
-        if (typeof data === 'object' && data.token) {
-            localStorage.setItem('authToken', data.token);
-            localStorage.setItem('userRole', data.role || 'user');
-            localStorage.setItem('userName', data.username || username);
-        } else {
-            // If data is just the token string
-            localStorage.setItem('authToken', data);
-            localStorage.setItem('userRole', username === 'admin' ? 'admin' : 'user');
-            localStorage.setItem('userName', username);
-        }
+        let token = (typeof data === 'object' && data.token) ? data.token : data;
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('userName', (data.username || username));
+        // Decode JWT to get role
+        const decoded = decodeJWT(token);
+        const role = decoded.role || data.role || (username === 'admin' ? 'admin' : 'user');
+        localStorage.setItem('userRole', role);
         
         window.location.href = 'index.html';
       } catch (err) {
@@ -236,18 +244,13 @@
         }
 
         const data = await loginRes.json();
-        
-        // Store auth data
-        if (typeof data === 'object' && data.token) {
-            localStorage.setItem('authToken', data.token);
-            localStorage.setItem('userRole', data.role || role);
-            localStorage.setItem('userName', data.username || username);
-        } else {
-            // If data is just the token string
-            localStorage.setItem('authToken', data);
-            localStorage.setItem('userRole', role);
-            localStorage.setItem('userName', username);
-        }
+        let token = (typeof data === 'object' && data.token) ? data.token : data;
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('userName', (data.username || username));
+        // Decode JWT to get role
+        const decoded = decodeJWT(token);
+        const decodedRole = decoded.role || data.role || role;
+        localStorage.setItem('userRole', decodedRole);
 
         window.location.href = 'index.html';
       } catch (err) {
