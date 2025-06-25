@@ -341,10 +341,14 @@ textarea:focus {
         width: 100%;
         font-size: 0.98rem;
         padding: 10px 0;
+        display: block;
+        text-align: center;
+        margin: 0;
     }
     .card-btn-row {
         flex-direction: column;
         gap: 7px;
+        align-items: stretch;
     }
     .header-bar {
         flex-direction: column;

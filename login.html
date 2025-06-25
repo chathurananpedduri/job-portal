@@ -121,14 +121,6 @@
         <label for="registerConfirmPassword">Confirm Password</label>
         <input type="password" id="registerConfirmPassword" required autocomplete="new-password">
       </div>
-      <div class="form-group">
-        <label for="registerRole">Role</label>
-        <select id="registerRole" required class="role-select">
-          <option value="">Select Role</option>
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
       <div id="registerError" class="error"></div>
       <button type="submit" class="submit-btn">Register</button>
     </form>
@@ -208,9 +200,9 @@
       const username = document.getElementById('registerUsername').value.trim();
       const password = document.getElementById('registerPassword').value;
       const confirmPassword = document.getElementById('registerConfirmPassword').value;
-      const role = document.getElementById('registerRole').value;
+      const role = "user"; // Always register as user
 
-      if (!username || !password || !role) {
+      if (!username || !password) {
         registerError.textContent = 'Please fill in all fields.';
         return;
       }
